@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReKraf - Rekursif Krafta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            text-align: center;
+            background-color: #FFFDD0; /* Warna cream */
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            color: #5B3A29; /* Warna coklat */
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        #fractalCanvas {
+            margin-top: 20px;
+            border: 2px solid #5B3A29; /* Warna coklat */
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .controls {
+            margin-top: 20px;
+            background-color: #E8D8B0; /* Warna cream muda */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .control-item {
+            margin: 10px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            background-color: #5B3A29; /* Warna coklat */
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #7A5B4D; /* Warna coklat lebih terang */
+        }
+
+        input[type="color"], input[type="number"], label {
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            text-align: left;
+            padding: 10px;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .checkbox-group {
+            text-align: left;
+            margin: 0;
+        }
+
+        .checkbox-group label {
+            display: block;
+            margin: 5px 0;
+        }
+
+        /* Responsif */
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ReKraf - Rekursif Krafta</h1>
+    <canvas id="fractalCanvas" width="800" height="800"></canvas>
+
+    <div class="controls">
+        <div class="control-item dropdown">
+            <label>Pilih Pola/Motif:</label>
+            <button onclick="toggleDropdown()">Pilih</button>
+            <div class="dropdown-content" id="dropdownContent">
+                <div class="checkbox-group">
+                    <label><input type="checkbox" value="sierpinski"> Sierpinski Triangle</label>
+                    <label><input type="checkbox" value="bunga"> Motif Bunga</label>
+                    <label><input type="checkbox" value="pohon"> Fractal Pohon</label>
+                    <label><input type="checkbox" value="daun"> Daun</label>
+                    <label><input type="checkbox" value="gembel"> Gembel</label>
+                    <label><input type="checkbox" value="mandelbrot"> Mandelbrot</label>
+                    <label><input type="checkbox" value="spiral"> Fractal Spiral (Archimedean)</label>
+                    <label><input type="checkbox" value="koch"> Fractal Snowflake (Koch Curve)</label>
+                </div>
+            </div>
+        </div>
+        <div class="control-item">
+            <label for="depthInput">Kedalaman Rekursif (1-10):</label>
+            <input type="number" id="depthInput" min="1" max="10" value="1">
+        </div>
+        <div class="control-item">
+            <label for="bgColorInput">Pilih Warna Latar Belakang:</label>
+            <input type="color" id="bgColorInput" value="#FFFDD0">
+        </div>
+        <div class="control-item">
+            <label for="colorInput">Pilih Warna Pola/Motif:</label>
+            <input type="color" id="colorInput" value="#FF0000">
+        </div>
+        <div class="control-item">
+            <button onclick="generateFractal()">Tampilkan Pola/Motif</button>
+            <button onclick="clearCanvas()">Bersihkan Kanvas</button>
+            <button onclick="saveImage()">Simpan Gambar</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('fractalCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const depthInput = document.getElementById('depthInput');
+        const colorInput = document.getElementById('colorInput');
+        const bgColorInput = document.getElementById('bgColorInput');
+        const dropdownContent = document.getElementById('dropdownContent');
+
+        // Fungsi untuk toggle dropdown
+        function toggleDropdown() {
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Fungsi untuk menggambar Sierpinski Triangle
+        function drawSierpinski(x, y, size, depth) {
+            if (depth === 0) {
+                ctx.fillStyle = colorInput.value;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + size, y);
+                ctx.lineTo(x + size / 2, y - Math.sqrt(3) * size / 2);
+                ctx.closePath();
+                ctx.fill();
+            } else {
+                const newSize = size / 2;
+                drawSierpinski(x, y, newSize, depth - 1);
+                drawSierpinski(x + newSize, y, newSize, depth - 1);
+                drawSierpinski(x + newSize / 2, y - Math.sqrt(3) * newSize / 2, newSize, depth - 1);
+            }
+        }
+
+        // Fungsi untuk menggambar motif Bunga
+        function drawBunga(x, y, size, depth) {
+            if (depth === 0) {
+                ctx.fillStyle = 'rgba(255, 0, 0.7)';
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.arc(x, y, size / 2, 0, 2 * Math.PI);
+                ctx.closePath();
+                ctx.fill();
+            } else {
+                const newSize = size / 2;
+                for (let i = 0; i < 6; i++) {
+                    let angle = i * Math.PI / 3;
+                    let newX = x + newSize * Math.cos(angle);
+                    let newY = y + newSize * Math.sin(angle);
+                    drawBunga(newX, newY, newSize, depth - 1);
+                }
+            }
+        }
+
+        
+
+        // Fungsi untuk menggambar motif Daun
+        function drawDaun(x, y, size, depth) {
+            if (depth === 0) {
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.quadraticCurveTo(x + size / 2, y - size / 2, x + size, y);
+                ctx.quadraticCurveTo(x + size / 2, y + size / 2, x, y);
+                ctx.closePath();
+                ctx.fillStyle = colorInput.value;
+                ctx.fill();
+            } else {
+                const newSize = size / 2;
+                drawDaun(x, y, newSize, depth - 1);
+                drawDaun(x + newSize, y, newSize, depth - 1);
+                drawDaun(x, y + newSize, newSize, depth - 1);
+            }
+        }
+
+        // Fungsi untuk menggambar Fractal Pohon
+        function drawPohon(x, y, angle, size, depth) {
+            if (depth === 0) return;
+
+            const xEnd = x + size * Math.cos(angle);
+            const yEnd = y - size * Math.sin(angle);
+
+            ctx.strokeStyle = colorInput.value;
+            ctx.lineWidth = depth;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(xEnd, yEnd);
+            ctx.stroke();
+
+            // Mengurangi ukuran cabang dan menyesuaikan sudut
+            drawPohon(xEnd, yEnd, angle - Math.PI / 6, size * 0.7, depth - 1);
+            drawPohon(xEnd, yEnd, angle + Math.PI / 6, size * 0.7, depth - 1);
+        }
+
+        // Fungsi untuk menggambar motif Batik Gembel
+        function drawGembel(x, y, size, depth) {
+            if (depth === 0) {
+                ctx.beginPath();
+                ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fillStyle = colorInput.value;
+                ctx.fill();
+            } else {
+                const newSize = size / 2;
+                drawGembel(x, y, newSize, depth - 1);
+                drawGembel(x + newSize, y, newSize, depth - 1);
+                drawGembel(x, y + newSize, newSize, depth - 1);
+            }
+        }
+
+        // Fungsi untuk menggambar Fractal Mandelbrot
+        function drawMandelbrot(x, y, size, depth) {
+            const maxIter = 100;
+            let zx, zy, cx, cy, iter;
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    zx = 0;
+                    zy = 0;
+                    cx = (i - size / 2) * 4 / size;
+                    cy = (j - size / 2) * 4 / size;
+                    iter = 0;
+                    while (zx * zx + zy * zy < 4 && iter < maxIter) {
+                        let temp = zx * zx - zy * zy + cx;
+                        zy = 2.0 * zx * zy + cy;
+                        zx = temp;
+                        iter++;
+                    }
+                    if (iter === maxIter) {
+                        ctx.fillStyle = colorInput.value;
+                        ctx.fillRect(x + i, y + j, 1, 1);
+                    }
+                }
+            }
+        }
+
+        // Fungsi untuk menggambar Fractal Spiral (Archimedean Spiral)
+        function drawSpiral(x, y, size, depth) {
+            const a = 1;  // Konstanta pengaturan jarak spiral
+            const b = 5;  // Kecepatan spiral
+            ctx.strokeStyle = colorInput.value;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            for (let i = 0; i < depth * 100; i++) {
+                let theta = i * 0.1;  // Sudut yang bertambah perlahan
+                let r = a + b * theta;  // Rumus Archimedean Spiral
+
+                let xPos = x + r * Math.cos(theta);
+                let yPos = y + r * Math.sin(theta);
+
+                if (i === 0) {
+                    ctx.moveTo(xPos, yPos);
+                } else {
+                    ctx.lineTo(xPos, yPos);
+                }
+            }
+
+            ctx.stroke();
+        }
+
+       // Fungsi untuk menggambar Koch Curve (Fractal Snowflake)
+       function drawKochCurve(x1, y1, x2, y2, depth) {
+            if (depth === 0) {
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = colorInput.value;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            } else {
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                const p1x = x1 + dx / 3;
+                const p1y = y1 + dy / 3;
+                const p2x = x1 + 2 * dx / 3;
+                const p2y = y1 + 2 * dy / 3;
+
+                const angle = Math.atan2(dy, dx) - Math.PI / 3;
+                const p3x = p1x + Math.cos(angle) * Math.sqrt(dx * dx + dy * dy) / 3;
+                const p3y = p1y + Math.sin(angle) * Math.sqrt(dx * dx + dy * dy) / 3;
+
+                drawKochCurve(x1, y1, p1x, p1y, depth - 1);
+                drawKochCurve(p1x, p1y, p3x, p3y, depth - 1);
+                drawKochCurve(p3x, p3y, p2x, p2y, depth - 1);
+                drawKochCurve(p2x, p2y, x2, y2, depth - 1);
+            }
+        }
+
+        // Fungsi untuk menggambar Snowflake (Koch Curve) menggunakan 3 sisi segitiga
+        function drawSnowflake(x, y, size, depth) {
+            const height = Math.sqrt(3) * size / 2;
+            const x1 = x - size / 2;
+            const y1 = y + height / 3;
+            const x2 = x + size / 2;
+            const y2 = y + height / 3;
+            const x3 = x;
+            const y3 = y - 2 * height / 3;
+
+            drawKochCurve(x1, y1, x2, y2, depth);
+            drawKochCurve(x2, y2, x3, y3, depth);
+            drawKochCurve(x3, y3, x1, y1, depth);
+        }
+
+        // Fungsi untuk menggambar fractal berdasarkan pilihan motif
+        function generateFractal() {
+            const depth = parseInt(depthInput.value);
+            const selectedMotifs = Array.from(document.querySelectorAll('.checkbox-group input:checked')).map(input => input.value);
+
+            // Mengatur warna latar belakang
+            ctx.fillStyle = bgColorInput.value;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const motifSize = 100; // Ukuran motif kecil
+            const horizontalRepeat = Math.floor(canvas.width / motifSize);
+            const verticalRepeat = Math.floor(canvas.height / motifSize);
+
+            for (let i = 0; i < horizontalRepeat; i++) {
+                for (let j = 0; j < verticalRepeat; j++) {
+                    const offsetX = i * motifSize;
+                    const offsetY = j * motifSize;
+
+                    selectedMotifs.forEach(motif => {
+                        if (motif === 'sierpinski') {
+                            drawSierpinski(offsetX, offsetY, motifSize, depth);
+                        } else if (motif === 'bunga') {
+                            drawBunga(offsetX + motifSize / 2, offsetY + motifSize / 2, motifSize, depth);
+                        } else if (motif === 'pohon') {
+                            drawPohon(offsetX + motifSize / 2, offsetY + motifSize, -Math.PI / 2, motifSize / 2, depth);
+                        } else if (motif === 'daun') {
+                            drawDaun(offsetX, offsetY, motifSize, depth);
+                        } else if (motif === 'gembel') {
+                            drawGembel(offsetX, offsetY, motifSize, depth);
+                        } else if (motif === 'mandelbrot') {
+                            drawMandelbrot(offsetX, offsetY, motifSize, depth);
+                        } else if (motif === 'spiral') {
+                            drawSpiral(offsetX + motifSize / 2, offsetY + motifSize / 2, motifSize, depth);
+                        } else if (motif === 'koch') {
+                            drawSnowflake(offsetX + motifSize / 2, offsetY + motifSize / 2, motifSize, depth);
+                        }
+                    });
+                }
+            }
+        }
+
+        // Fungsi untuk membersihkan kanvas
+        function clearCanvas() {
+            ctx.fillStyle = bgColorInput.value; // Menggunakan warna latar belakang
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Fungsi untuk menyimpan gambar
+        function saveImage() {
+            const link = document.createElement('a');
+            link.download = 'rekraf_image.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // Panggil fungsi untuk menggambar fractal secara default
+        generateFractal();
+    </script>
+
+</body>
+</html>
